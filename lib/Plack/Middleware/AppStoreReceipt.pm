@@ -7,7 +7,7 @@ use warnings;
 use strict;
 use parent qw(Plack::Middleware);
 use Plack::Request;
-use Plack::Util::Accessor qw(route method path receipt_data allow_sandbox);
+use Plack::Util::Accessor qw(route method path receipt_data allow_sandbox shared_secret);
 use JSON;
 use Try::Tiny;
 use AnyEvent::HTTP;
@@ -53,8 +53,9 @@ sub _verify_receipt {
 
     my $plack_req = Plack::Request->new($env);
     my $receipt_data_param = $plack_req->param('receipt_data') || $plack_req->param($self->receipt_data);
-    my %transformfields = ("receipt-data" => $receipt_data_param);
-    my $receipt_data = encode_json (\%transformfields);
+    my %params = ("receipt-data" => $receipt_data_param);
+    $params{shared_secret} = $self->shared_secret if $self->shared_secret;
+    my $receipt_data = encode_json (\%params);
 
     my $res;
     $res = $self->_post_receipt_to_itunes( 'production', $receipt_data, $env );
@@ -116,16 +117,14 @@ Plack::Middleware::AppStoreReceipt - Verifying a Receipt with the Apple App Stor
 
     enable "AppStoreReceipt";
 
-By default,
-
-you can POST 'receipt_data' with a base64 encoded string to /receipts/validate
+By default, you can POST 'receipt_data' with a base64 encoded string to /receipts/validate
 aka, curl -v -X POST http://localhost:5000/receipts/validate -d "receipt_data=$base64EncodedString"
 
 Or, to use the sandbox testing environment.
 
     enable "AppStoreReceipt", allow_sandbox => 1;
 
-You can also be able to change the default route by either
+you are able to change the default route as well by either
 
     enable "AppStoreReceipt", route => { 'post' => '/appstore/verify' };
 or
@@ -134,6 +133,10 @@ or
 And you can even change the default receipt_data parameter
 
     enable "AppStoreReceipt", receipt_data => 'receipt_param';
+
+If you have a shared secret for iTunes, you can set it as
+
+    enable "AppStoreReceipt", shared_secret => 'mysecret';
 
 
 =head1 DESCRIPTION
