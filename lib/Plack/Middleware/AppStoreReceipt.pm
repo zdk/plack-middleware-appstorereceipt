@@ -115,18 +115,26 @@ Plack::Middleware::AppStoreReceipt - Verifying a Receipt with the Apple App Stor
 
 =head1 SYNOPSIS
 
+In the app.psgi
+
     enable "AppStoreReceipt";
 
-By default, you can POST 'receipt_data' with a base64 encoded string to /receipts/validate
-aka, curl -v -X POST http://localhost:5000/receipts/validate -d "receipt_data=$base64EncodedString"
+That's it.
 
-Or, to use the sandbox testing environment.
+By default, you can POST 'receipt_data' with a base64 encoded string to /receipts/validate
+
+aka, curl -X POST http://localhost:5000/receipts/validate -d "receipt_data=$base64EncodedString"
+
+Since it's disable a sandbox request by default, therefore to use the sandbox testing environment,
+please set allow_sandbox to true
 
     enable "AppStoreReceipt", allow_sandbox => 1;
 
-you are able to change the default route as well by either
+Perhaps, you don't like /receipts/validate endpoint, though you are able to change the default route as well
+by either
 
     enable "AppStoreReceipt", route => { 'post' => '/appstore/verify' };
+    (to use route, the format is 'route => { $method => $path }')
 or
     enable "AppStoreReceipt", method => 'POST', path => /appstore/verify';
 
@@ -134,10 +142,11 @@ And you can even change the default receipt_data parameter
 
     enable "AppStoreReceipt", receipt_data => 'receipt_param';
 
-If you have a shared secret for iTunes, you can set it as
+If you have a shared secret for iTunes, you may set it as
 
     enable "AppStoreReceipt", shared_secret => 'mysecret';
 
+As always, set psgi.nonblocking for an asynchronous request. (AnyEvent::HTTP)
 
 =head1 DESCRIPTION
 
@@ -157,6 +166,8 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =head1 SEE ALSO
+
+L<Plack::Middleware>
 
 http://www.macworld.com/article/1167677/hacker_exploits_ios_flaw_for_free_in_app_purchases.html
 
