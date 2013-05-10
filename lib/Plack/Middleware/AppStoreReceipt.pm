@@ -146,7 +146,7 @@ If you have a shared secret for iTunes, you may set it as
 
     enable "AppStoreReceipt", shared_secret => '(shared secret bytes here)';
 
-As always, set psgi.nonblocking for an asynchronous request. (AnyEvent::HTTP)
+This middleware will make an asynchronous request (based on AnyEvent::HTTP), if psgi.nonblocking interface is true.
 
 =head1 DESCRIPTION
 
