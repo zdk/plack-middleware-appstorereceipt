@@ -54,7 +54,7 @@ sub _verify_receipt {
     my $plack_req = Plack::Request->new($env);
     my $receipt_data_param = $plack_req->param('receipt_data') || $plack_req->param($self->receipt_data);
     my %params = ("receipt-data" => $receipt_data_param);
-    $params{shared_secret} = $self->shared_secret if $self->shared_secret;
+    $params{password} = $self->shared_secret if $self->shared_secret;
     my $receipt_data = encode_json (\%params);
 
     my $res;
@@ -136,15 +136,15 @@ by either
     enable "AppStoreReceipt", route => { 'post' => '/appstore/verify' };
     (to use route, the format is 'route => { $method => $path }')
 or
-    enable "AppStoreReceipt", method => 'POST', path => /appstore/verify';
+    enable "AppStoreReceipt", method => 'POST', path => '/appstore/verify';
 
 And you can even change the default receipt_data parameter
 
-    enable "AppStoreReceipt", receipt_data => 'receipt_param';
+    enable "AppStoreReceipt", receipt_data => '(name of receipt parameter here)';
 
 If you have a shared secret for iTunes, you may set it as
 
-    enable "AppStoreReceipt", shared_secret => 'mysecret';
+    enable "AppStoreReceipt", shared_secret => '(shared secret bytes here)';
 
 As always, set psgi.nonblocking for an asynchronous request. (AnyEvent::HTTP)
 
