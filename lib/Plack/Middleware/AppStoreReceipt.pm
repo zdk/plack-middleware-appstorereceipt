@@ -1,7 +1,7 @@
 package Plack::Middleware::AppStoreReceipt;
 # ABSTRACT: The Plack::Middleware that verifies Apple App Store Receipts for In-App Purchases
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use warnings;
 use strict;
@@ -154,7 +154,7 @@ This middleware provides an endpoint for an iOS app to validate its reciept data
 Therefore, this middleware ensures that your iOS app does not post the iap receipt to any fake Apple server.
 
 It does post given receipt data to iTunes production first.
-If it’s a sandbox receipt (told by iTunes production), it will be re-sended to iTunes sandbox again automatically.
+If it is a sandbox receipt (told by iTunes production), it will be re-sended to iTunes sandbox again automatically.
 
 =head1 AUTHOR
 

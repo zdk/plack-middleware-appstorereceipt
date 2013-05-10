@@ -44,7 +44,7 @@ DESCRIPTION
     reciept data. Therefore, this middleware ensures that your iOS app does
     not post the iap receipt to any fake Apple server.
 
-    It does post given receipt data to iTunes production first. If it’s a
+    It does post given receipt data to iTunes production first. If it is a
     sandbox receipt (told by iTunes production), it will be re-sended to
     iTunes sandbox again automatically.
 
