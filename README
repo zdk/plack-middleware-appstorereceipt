@@ -36,9 +36,6 @@ SYNOPSIS
 
         enable "AppStoreReceipt", shared_secret => '(shared secret bytes here)';
 
-    This middleware will make an asynchronous request (based on
-    AnyEvent::HTTP), if psgi.nonblocking interface is true.
-
 DESCRIPTION
     This middleware provides an endpoint for an iOS app to validate its
     reciept data. Therefore, this middleware ensures that your iOS app does

@@ -1,7 +1,7 @@
 package Plack::Middleware::AppStoreReceipt;
 # ABSTRACT: The Plack::Middleware that verifies Apple App Store Receipts for In-App Purchases
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use warnings;
 use strict;
@@ -10,7 +10,7 @@ use Plack::Request;
 use Plack::Util::Accessor qw(route method path receipt_data allow_sandbox shared_secret);
 use JSON;
 use Try::Tiny;
-use AnyEvent::HTTP;
+use Furl;
 
 sub prepare_app {
     my $self = shift;
@@ -59,7 +59,7 @@ sub _verify_receipt {
 
     my $res;
     $res = $self->_post_receipt_to_itunes( 'production', $receipt_data, $env );
-    if ( $self->_is_sandboxed( $self->_parse_success_response( $res ) ) ) {
+    if ( $res->[0] == 200 && $self->_is_sandboxed( $self->_parse_success_response( $res ) ) ) {
         #should request to sandbox url since it's sandbox receipt!!
         print "Retrying to post to sandbox environment...\n";
         $res = $self->_post_receipt_to_itunes( 'sandbox', $receipt_data, $env );
@@ -77,21 +77,19 @@ sub _post_receipt_to_itunes {
         'sandbox'    => 'https://sandbox.itunes.apple.com/verifyReceipt',
     };
 
-    my $res;
-    my $cv = AnyEvent->condvar;
-    AnyEvent::HTTP::http_post ($endpoint->{$itunes_env}, $receipt_data,
-        timeout => 15, sub {
-            my ( $body, $hdr ) = @_;
-            if ($hdr->{Status} =~ /^2/) {
-                $res = [200, ['Content-Type' => 'application/json'], [$body]];
-            } else {
-                $res = [500, ['Content-Type' => 'text/plain' ], ["error, $hdr->{Status} $hdr->{Reason}\n"]];
-            }
-            $cv->send;
-        }
+    my $furl = Furl->new(
+        agent   => 'Furl/2.15',
+        timeout => 10,
     );
-    $cv->recv unless $env->{'psgi.nonblocking'};
-    return $res;
+
+     my $res = $furl->post(
+        $endpoint->{$itunes_env}, # URL
+        ['Content-Type' => 'application/json'],                 # headers
+        $receipt_data,      # form data (HashRef/FileHandle are also okay)
+    );
+
+    return [200, ['Content-Type' => 'application/json'], [$res->content]] if $res->is_success;
+    return [500, ['Content-Type' => 'text/plain' ], ["error: ".$res->status_line."\n"]];
 }
 
 sub _parse_success_response {
@@ -145,8 +143,6 @@ And you can even change the default receipt_data parameter
 If you have a shared secret for iTunes, you may set it as
 
     enable "AppStoreReceipt", shared_secret => '(shared secret bytes here)';
-
-This middleware will make an asynchronous request (based on AnyEvent::HTTP), if psgi.nonblocking interface is true.
 
 =head1 DESCRIPTION
 
