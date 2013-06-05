@@ -1,0 +1,2 @@
+requires 'Plack::Middleware::AppStoreReceipt', '0.03';
+requires 'IO::Socket::SSL', '1.94';

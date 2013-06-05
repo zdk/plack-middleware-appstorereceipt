@@ -25,7 +25,9 @@ SYNOPSIS
 
         enable "AppStoreReceipt", route => { 'post' => '/appstore/verify' };
         (to use route, the format is 'route => { $method => $path }')
+
     or
+
         enable "AppStoreReceipt", method => 'POST', path => '/appstore/verify';
 
     And you can even change the default receipt_data parameter
